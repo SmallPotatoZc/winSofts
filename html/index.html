@@ -1,0 +1,283 @@
+<!DOCTYPE html style="width:100%;height:100%">
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Zhang Chao</title>
+  <style>
+    body {
+      margin: 0;
+      /* display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center; */
+    }
+
+    .input-group {
+      margin-bottom: 1rem !important;
+      position: relative;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+      -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+      align-items: stretch;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #212529;
+      text-align: left;
+      background-color: #fff;
+      outline: none;
+    }
+
+    .form-control {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      position: relative;
+      flex: 1 1 auto;
+      width: 1%;
+      margin-bottom: 0;
+      display: block;
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #495057;
+      background-color: #fff;
+      background-clip: padding-box;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      overflow: visible;
+      margin: 0;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .input-group-append {
+      margin-left: -1px;
+      display: flex;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #212529;
+      text-align: left;
+      outline: none;
+    }
+
+    .btn {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      position: relative;
+      z-index: 2;
+      color: #6c757d;
+      background-color: transparent;
+      background-image: none;
+      border-color: 1px solid#6c757d;
+      display: inline-block;
+      font-weight: 400;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      user-select: none;
+      border: 1px solid transparent;
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      border-radius: 0.25rem;
+      outline: none;
+      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .btn:not(:disabled):not(.disabled) {
+      cursor: pointer;
+      outline: none;
+    }
+
+    .btn:active {
+      color: #fff;
+      background-color: #6c757d;
+      border-color: #6c757d;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      position: relative;
+      z-index: 2;
+      left: 4px;
+    }
+
+    .btn:hover {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      background-color: #6c757d;
+      border-color: #6c757d;
+      text-decoration: none;
+    }
+
+    .info-box {
+      color: #F5F5F5;
+      padding: 2em;
+    }
+
+    .error-msg {
+      background-color: #D80A0A;
+    }
+
+    .wizard-msg {
+      background-color: #673AB7;
+    }
+
+    .field-block {
+      padding: 1em 2em;
+    }
+
+    .field-block .field-label {
+      font-weight: bold;
+    }
+  </style>
+  <script src="./eml.js"></script>
+  <script src="./base64.js"></script>
+</head>
+
+<body style="width:100%;height:100%">
+  <div class="msg-example">
+    <div class="info-box wizard-msg">
+      步骤：1. 点击选择文件；2.待程序处理成功，会出现 ppt 的下载链接；3.点击下载链接
+    </div>
+    <div class="field-block">
+      <div class="input-group">
+        <input type="file" class="form-control src-file" placeholder="ip地址" />
+        <div class="input-group-append">
+          <button class="btn" type="button" onclick="window.dl()">开始处理</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="msg-info" style="display: none;">
+      <div class="info-box wizard-msg">
+        2. MSG info (
+        <span class="msg-file-name"></span>)
+      </div>
+      <div class="field-block">
+        <div class="field-label">From</div>
+        <div class="msg-from"></div>
+      </div>
+      <div class="field-block">
+        <div class="field-label">To</div>
+        <div class="msg-to"></div>
+      </div>
+      <div class="field-block">
+        <div class="field-label">Date (from Headers, example)</div>
+        <div class="msg-date"></div>
+      </div>
+      <div class="field-block">
+        <div class="field-label">Subject</div>
+        <div class="msg-subject"></div>
+      </div>
+      <div class="field-block">
+        <div class="field-label">Body</div>
+        <div class="msg-body"></div>
+      </div>
+      <div class="field-block">
+        <div class="field-label">Attachments</div>
+        <div class="msg-attachment"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="incorrect-type info-box error-msg" style="display: none;">
+    文件不符合格式！
+  </div>
+
+  <div class="file-api-not-available info-box error-msg" style="display: none;">
+    您的浏览器不支持！
+  </div>
+  <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+  <script>
+    $(function () {
+      $('.src-file').change(function () {
+        var selectedFile = this.files[0];
+        if (!selectedFile) {
+          $('.msg-info, .incorrect-type').hide();
+          return;
+        }
+        if (!(selectedFile.name.indexOf('.msg') == -1 || selectedFile.name.indexOf('.ppt') == -1 ||
+            selectedFile.name.indexOf('.pptx') == -1 || selectedFile.name.indexOf('.eml') || -1)) {
+          $('.msg-info').hide();
+          $('.incorrect-type').show();
+          return;
+        }
+        $('.msg-example .msg-file-name').html(selectedFile.name);
+        $('.incorrect-type').hide();
+        var fileReader = new FileReader();
+        fileReader.onload = function (evt) {
+          var buffer = evt.target.result;
+          var enc = new TextDecoder("utf-8");
+          var content = enc.decode(buffer);
+          emlformat.read(content, function (err, data) {
+            window.result = data;
+            console.log('-----', err, data)
+          })
+
+
+          // var msgReader = new MSGReader(buffer);
+          // var fileData = msgReader.getFileData();
+          // if (!fileData.error) {
+          //   $('.msg-example .msg-from').html(formatEmail({
+          //     name: fileData.senderName,
+          //     email: fileData.senderEmail
+          //   }));
+          //   $('.msg-example .msg-to').html(jQuery.map(fileData.recipients, function (recipient, i) {
+          //     return formatEmail(recipient);
+          //   }).join('<br/>'));
+          //   $('.msg-example .msg-date').html(getMsgDate(fileData.headers));
+          //   $('.msg-example .msg-subject').html(fileData.subject);
+          //   $('.msg-example .msg-body').html(
+          //     fileData.body ? fileData.body.substring(0, Math.min(500, fileData.body.length)) +
+          //     (fileData.body.length > 500 ? '...' : '') : '');
+          //   $('.msg-example .msg-attachment').html(jQuery.map(fileData.attachments, function (attachment, i) {
+          //     return attachment.fileName + ' [' + attachment.contentLength + 'bytes]' +
+          //       (attachment.pidContentId ? '; ID = ' + attachment.pidContentId : '');
+          //   }).join('<br/>'));
+          //   $('.msg-info').show();
+          //   // Use msgReader.getAttachment to access attachment content ...
+          //   // msgReader.getAttachment(0) or msgReader.getAttachment(fileData.attachments[0])
+          // } else {
+          //   $('.msg-info').hide();
+          //   $('.incorrect-type').show();
+          // }
+        };
+        fileReader.readAsArrayBuffer(selectedFile);
+      });
+
+      window.dl = function () {
+        // 创建隐藏的可下载链接
+        var eleLink = document.createElement('a');
+        eleLink.download = 'filename.pptx';
+        eleLink.style.display = 'none';
+        // 字符内容转变成blob地址
+        var blob = new Blob([window.ttt], {
+          type: 'application/vnd.ms-powerpoint'
+        });
+        var url = URL.createObjectURL(blob); 
+        eleLink.href = url;       
+        // 触发点击
+        document.body.querySelector('.msg-example').appendChild(eleLink);
+        eleLink.click();
+        // 然后移除
+        document.body.querySelector('.msg-example').removeChild(eleLink);
+      }
+    });
+  </script>
+</body>
+<script>
+</script>
+
+</html>
