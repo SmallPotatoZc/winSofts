@@ -271,10 +271,9 @@ emlformat.read = function(eml, options, callback) {
       function _append(headers, content) {
         var encoding = headers["Content-Transfer-Encoding"];
         if (encoding == "base64") {
-          window.ttt = content.replace(/\r?\n/g, "");
           // console.log('----3', window.ttt = content.replace(/\r?\n/g, ""));
           // content = Buffer.from(content.replace(/\r?\n/g, ""), "base64");
-          content = window.base64decode(window.ttt);
+          content = content.replace(/\r?\n/g, "");
         }
         else if (encoding == "quoted-printable") {
           content = emlformat.unquotePrintable(content);

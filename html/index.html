@@ -141,6 +141,10 @@
     .field-block .field-label {
       font-weight: bold;
     }
+    .field-label{
+      font-weight: 600;
+      font-size: 2em;
+    }
   </style>
   <script src="./eml.js"></script>
   <script src="./base64.js"></script>
@@ -155,14 +159,14 @@
       <div class="input-group">
         <input type="file" class="form-control src-file" placeholder="ip地址" />
         <div class="input-group-append">
-          <button class="btn" type="button" onclick="window.dl()">开始处理</button>
+          <button class="btn" type="button" onclick="window.dl()">开始下载</button>
         </div>
       </div>
     </div>
 
     <div class="msg-info" style="display: none;">
       <div class="info-box wizard-msg">
-        2. MSG info (
+        解析出的文件信息(
         <span class="msg-file-name"></span>)
       </div>
       <div class="field-block">
@@ -223,36 +227,24 @@
           var content = enc.decode(buffer);
           emlformat.read(content, function (err, data) {
             window.result = data;
-            console.log('-----', err, data)
+            if (!err) {
+              console.log('dddd', data);
+              $('.msg-example .msg-from').html(jQuery.map(data.from, function (recipient, i) {
+                return i + ':' + recipient;
+              }).join('<br/>'));
+              $('.msg-example .msg-to').html(jQuery.map(data.to, function (recipient, i) {
+                return i + ':' + recipient;
+              }).join('<br/>'));
+              $('.msg-example .msg-date').html(data.date);
+              $('.msg-example .msg-subject').html(data.subject);
+              $('.msg-example .msg-body').html(data.html);
+              $('.msg-example .msg-attachment').html('内部含有文件' + ':' + data.subject);
+              $('.msg-info').show();
+            } else {
+              $('.msg-info').hide();
+              $('.incorrect-type').show();
+            }
           })
-
-
-          // var msgReader = new MSGReader(buffer);
-          // var fileData = msgReader.getFileData();
-          // if (!fileData.error) {
-          //   $('.msg-example .msg-from').html(formatEmail({
-          //     name: fileData.senderName,
-          //     email: fileData.senderEmail
-          //   }));
-          //   $('.msg-example .msg-to').html(jQuery.map(fileData.recipients, function (recipient, i) {
-          //     return formatEmail(recipient);
-          //   }).join('<br/>'));
-          //   $('.msg-example .msg-date').html(getMsgDate(fileData.headers));
-          //   $('.msg-example .msg-subject').html(fileData.subject);
-          //   $('.msg-example .msg-body').html(
-          //     fileData.body ? fileData.body.substring(0, Math.min(500, fileData.body.length)) +
-          //     (fileData.body.length > 500 ? '...' : '') : '');
-          //   $('.msg-example .msg-attachment').html(jQuery.map(fileData.attachments, function (attachment, i) {
-          //     return attachment.fileName + ' [' + attachment.contentLength + 'bytes]' +
-          //       (attachment.pidContentId ? '; ID = ' + attachment.pidContentId : '');
-          //   }).join('<br/>'));
-          //   $('.msg-info').show();
-          //   // Use msgReader.getAttachment to access attachment content ...
-          //   // msgReader.getAttachment(0) or msgReader.getAttachment(fileData.attachments[0])
-          // } else {
-          //   $('.msg-info').hide();
-          //   $('.incorrect-type').show();
-          // }
         };
         fileReader.readAsArrayBuffer(selectedFile);
       });
@@ -260,19 +252,43 @@
       window.dl = function () {
         // 创建隐藏的可下载链接
         var eleLink = document.createElement('a');
-        eleLink.download = 'filename.pptx';
+        eleLink.download = window.result.subject;
         eleLink.style.display = 'none';
         // 字符内容转变成blob地址
-        var blob = new Blob([window.ttt], {
-          type: 'application/vnd.ms-powerpoint'
-        });
-        var url = URL.createObjectURL(blob); 
-        eleLink.href = url;       
+        var blob = b64toBlob(window.result.attachments[0].data, window.result.attachments[0].contentType);
+        var url = URL.createObjectURL(blob);
+        eleLink.href = url;
         // 触发点击
         document.body.querySelector('.msg-example').appendChild(eleLink);
         eleLink.click();
         // 然后移除
         document.body.querySelector('.msg-example').removeChild(eleLink);
+      }
+
+      function b64toBlob(b64Data, contentType, sliceSize) {
+        contentType = contentType || '';
+        sliceSize = sliceSize || 512;
+
+        var byteCharacters = window.base64decode(b64Data);
+        var byteArrays = [];
+
+        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+          var byteNumbers = new Array(slice.length);
+          for (var i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+
+          var byteArray = new Uint8Array(byteNumbers);
+
+          byteArrays.push(byteArray);
+        }
+
+        var blob = new Blob(byteArrays, {
+          type: contentType
+        });
+        return blob;
       }
     });
   </script>
